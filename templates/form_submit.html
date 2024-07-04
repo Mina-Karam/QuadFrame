@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pseudo-hologram Video Maker</title>
+    <!-- Link to the external stylesheet -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Main container for the content -->
+    <div id="container">
+        <!-- Introduction section -->
+        <div class="title">
+            <h1>Introduction</h1>
+        </div>
+        <div>
+            <!-- Description of the hologram video conversion process -->
+            <p id="intro">
+                This web page helps you to convert video to 
+                <a href="http://www.telegraph.co.uk/technology/mobile-phones/11780393/How-to-turn-your-phone-into-a-3D-hologram-projector.html">
+                    four-side hologram video
+                </a>. 
+                The figure below illustrates the layout of the output video. In the output video, the padding part will be pure black as well as the background. 
+                If you'd like to put your phone/tablet below hologram pyramid, check the "screen up" box.
+            </p>
+            <!-- Illustration image of the hologram video layout -->
+            <img width="500" src="{{ url_for('static', filename='layout.png') }}">
+        </div>
+        <!-- Upload section -->
+        <div class="title">
+            <h1>Upload Your Video</h1>
+        </div>
+        <div id="content">
+            <!-- Form for video upload and conversion parameters -->
+            <form action="" method="post" enctype="multipart/form-data">
+                <!-- Input for video length -->
+                <label for="length">Please enter the length (0 < length ≤ 5000):</label>
+                <input type="text" name="length" placeholder="e.g., 2000" /><br />
+                
+                <!-- Input for 'd' parameter -->
+                <label for="d">Please enter d (0 < d < length/2):</label>
+                <input type="text" name="d" placeholder="e.g., 500" /><br />
+                
+                <!-- Input for padding parameter -->
+                <label for="padding">Please enter padding (space should be remained for video):</label>
+                <input type="text" name="padding" placeholder="e.g., 10" /><br />
+                
+                <!-- Checkbox for screen up option -->
+                Screen up? <input type="checkbox" name="upsidedown"/><br /><br />
+                
+                <!-- File input for video upload -->
+                <input type="file" name="file">
+                
+                <!-- Note about allowed file formats and size limit -->
+                <p>Files with extensions listed on 
+                    <a href="https://en.wikipedia.org/wiki/Video_file_format">Wikipedia</a> are allowed. Size limit = 100M.
+                </p>
+                <p>Download will automatically start when conversion is done.</p>
+                
+                <!-- Submit button for form -->
+                <input type="submit" value="Submit">
+            </form>
+        </div>
+    </div>
+</body>
+</html>
