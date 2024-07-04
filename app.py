@@ -120,10 +120,10 @@ def upload_file():
         file = request.files['file']
         if file and allowed_file(file.filename):
             # Create a unique directory for each upload using UUID
-            upload_dirname = str(uuid.uuid4())
+            upload_dirname = str(uuid.uuid4())  # Generate new UUID for directory
             my_dir = os.path.abspath(os.path.dirname(__file__))
             uploadpath = os.path.join(my_dir, app.config['UPLOAD_FOLDER'], upload_dirname)
-            os.makedirs(uploadpath)
+            os.makedirs(uploadpath, exist_ok=True)
 
             # Generate unique filenames using UUID
             filename = f"{uuid.uuid4()}.{file.filename.rsplit('.', 1)[-1]}"
