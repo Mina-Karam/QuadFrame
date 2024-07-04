@@ -1,18 +1,13 @@
 import os
+import uuid
 import numpy as np
 import cv2
 import subprocess as sp
 import shutil
 from flask import Flask, render_template, request, send_from_directory
 
-# Configuration for upload folder and allowed file extensions
 UPLOAD_FOLDER = 'uploads/'
-ALLOWED_EXTENSIONS = set([
-    'png', 'webm', 'mkv', 'flv', 'vob', 'ogv', 'ogg', 'drc', 'gif', 'gifv', 
-    'mng', 'avi', 'mov', 'qt', 'wmv', 'rm', 'rmvb', 'asf', 'mp4', 'm4p', 'm4v', 
-    'mpg', 'mp2', 'mpeg', 'mpe', 'mpv', 'm2v', 'm4v', 'svi', '3gp', '3g2', 
-    'mxf', 'roq', 'nsv', 'flv', 'f4v', 'f4p', 'f4a', 'f4b', 'yuv'
-])  # Video file formats
+ALLOWED_EXTENSIONS = set(['png', 'webm', 'mkv', 'flv', 'vob', 'ogv', 'ogg', 'drc', 'gif', 'gifv', 'mng', 'avi', 'mov', 'qt', 'wmv', 'rm', 'rmvb', 'asf', 'mp4', 'm4p', 'm4v', 'mpg', 'mp2', 'mpeg', 'mpe', 'mpv', 'm2v', 'm4v', 'svi', '3gp', '3g2', 'mxf', 'roq', 'nsv', 'flv', 'f4v', 'f4p', 'f4a', 'f4b', 'yuv'])  # https://en.wikipedia.org/wiki/Video_file_format
 
 # Initialize the Flask application
 app = Flask(__name__)
@@ -23,7 +18,7 @@ def hologram(infile, outfile, screen_below_pyramid=False):
     '''Transform infile video to a hologram video with no audio track and save to outfile'''
     capture = cv2.VideoCapture(infile)
     if capture.isOpened():
-        width = capture.get(cv2.CAP_PROP_FRAME_WIDTH)   # float `width`
+        width = capture.get(cv2.CAP_PROP_FRAME_WIDTH)  # float `width`
         height = capture.get(cv2.CAP_PROP_FRAME_HEIGHT)  # float `height`
         fps = capture.get(cv2.CAP_PROP_FPS)
 
@@ -87,17 +82,18 @@ def upload_file():
             except:
                 pass
             os.makedirs(uploadpath)
-            filename = 'original_video.' + file.filename.split('.', 1)[-1]
+            # Generate a unique filename
+            filename = f"{uuid.uuid4()}.{file.filename.split('.', 1)[-1]}"
             filepath = os.path.join(uploadpath, filename)
             file.save(filepath)
             upsidedown = 'upsidedown' in request.form
-            outpath = os.path.join(uploadpath, 'video_no_audio.mp4')
+            outpath = os.path.join(uploadpath, f"{uuid.uuid4()}.mp4")
             hologram(filepath, outpath, screen_below_pyramid=upsidedown)
-            sp.call(['ffmpeg', '-i', outpath, '-i', filepath, '-c:v', 'copy', '-c:a', 'aac', '-map', '0:v:0', '-map', '1:a:0?', os.path.join(uploadpath, 'out.mp4')])  # Add audio track
-            return send_from_directory(uploadpath, 'out.mp4', as_attachment=True)
+            output_filename = f"{uuid.uuid4()}.mp4"
+            sp.call(['ffmpeg', '-i', outpath, '-i', filepath, '-c:v', 'copy', '-c:a', 'aac', '-map', '0:v:0', '-map', '1:a:0?', os.path.join(uploadpath, output_filename)])  # Add audio track
+            return send_from_directory(uploadpath, output_filename, as_attachment=True)
     return form()
 
 # Run the app :)
 if __name__ == '__main__':
     app.run(debug=True)
-
