@@ -6,8 +6,36 @@ import subprocess as sp
 import shutil
 from flask import Flask, render_template, request, send_from_directory
 
+# Check dependencies function
+def check_dependencies():
+    try:
+        import flask
+        import numpy
+        import cv2
+    except ImportError as e:
+        print(f"Missing dependency: {e.name}")
+        return False
+    return True
+
+# Check dependencies and install if necessary
+if not check_dependencies():
+    print("Installing dependencies...")
+    os.system("install_dependencies.bat")
+    if not check_dependencies():
+        raise Exception("Failed to install dependencies. Please install them manually.")
+    else:
+        print("Dependencies installed successfully.")
+
+# Your existing Flask application code starts here
+
 UPLOAD_FOLDER = 'uploads/'
-ALLOWED_EXTENSIONS = set(['png', 'webm', 'mkv', 'flv', 'vob', 'ogv', 'ogg', 'drc', 'gif', 'gifv', 'mng', 'avi', 'mov', 'qt', 'wmv', 'rm', 'rmvb', 'asf', 'mp4', 'm4p', 'm4v', 'mpg', 'mp2', 'mpeg', 'mpe', 'mpv', 'm2v', 'm4v', 'svi', '3gp', '3g2', 'mxf', 'roq', 'nsv', 'flv', 'f4v', 'f4p', 'f4a', 'f4b', 'yuv'])  # Allowed video file formats
+ALLOWED_EXTENSIONS = {
+    'png', 'webm', 'mkv', 'flv', 'vob', 'ogv', 'ogg', 'drc',
+    'gif', 'gifv', 'mng', 'avi', 'mov', 'qt', 'wmv', 'rm', 'rmvb',
+    'asf', 'mp4', 'm4p', 'm4v', 'mpg', 'mp2', 'mpeg', 'mpe', 'mpv',
+    'm2v', 'm4v', 'svi', '3gp', '3g2', 'mxf', 'roq', 'nsv', 'flv',
+    'f4v', 'f4p', 'f4a', 'f4b', 'yuv'
+}  # Source: https://en.wikipedia.org/wiki/Video_file_format
 
 # Initialize the Flask application
 app = Flask(__name__)
