@@ -45,10 +45,12 @@ app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # File size limit = 100MB
 def hologram(infile, outfile, screen_below_pyramid=False):
     '''Transforms infile video into a hologram video with no audio track and saves it to outfile.'''
     capture = cv2.VideoCapture(infile)
+    
     if capture.isOpened():
         width = capture.get(cv2.CAP_PROP_FRAME_WIDTH)  # Width of the video
         height = capture.get(cv2.CAP_PROP_FRAME_HEIGHT)  # Height of the video
         fps = capture.get(cv2.CAP_PROP_FPS)  # Frames per second
+        total_frames = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))  # Total number of frames
 
     # Retrieve form data from Flask request
     length = int(request.form['length'])
@@ -85,15 +87,18 @@ def hologram(infile, outfile, screen_below_pyramid=False):
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     out = cv2.VideoWriter(outfile, fourcc, fps, (length, length))
 
+    # Initialize frame counter
+    frame_count = 0
+
     # Process each frame of the input video
     while True:
         ret, frame = cap.read()
         if not ret:
             break
-        
+
         # Resize the frame to fit the hologram area
         resized_frame = cv2.resize(frame, (new_wid, new_hgt))
-        
+
         # Arrange resized frames according to hologram pyramid geometry
         if screen_below_pyramid:
             resized_frame = cv2.flip(resized_frame, 0)
@@ -101,9 +106,14 @@ def hologram(infile, outfile, screen_below_pyramid=False):
         bgd[length // 2 - d - padding - new_hgt:length // 2 - d - padding, length // 2 - new_wid // 2:length // 2 + new_wid // 2] = cv2.flip(resized_frame, -1)
         bgd[length // 2 - new_wid // 2:length // 2 + new_wid // 2, length // 2 + d + padding:length // 2 + d + new_hgt + padding] = cv2.flip(cv2.transpose(resized_frame), 0)
         bgd[length // 2 - new_wid // 2:length // 2 + new_wid // 2, length // 2 - d - padding - new_hgt:length // 2 - d - padding] = cv2.flip(cv2.transpose(resized_frame), 1)
-        
+
         # Write the frame to the output video
         out.write(bgd)
+
+        # Increment frame counter and display progress
+        frame_count += 1
+        progress_percentage = (frame_count / total_frames) * 100
+        print(f"Processing: {progress_percentage:.2f}% complete", end="\r")
 
     # Release resources
     cap.release()
